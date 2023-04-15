@@ -1,0 +1,52 @@
+<div [style.margin-bottom]="'1rem'" class="flex align-items-center justify-content-between"
+    *ngIf="uploader.queue.length > 0">
+    {{ uploader.queue.length }} Files Selected
+    <button class="btn-primary" (click)="uploader.uploadAll()">Import</button>
+</div>
+
+<div *ngIf="!uploader.isUploading && uploader.queue.length <= 0">
+    <div class="file-drop-zone flex align-items-center justify-content-center" ng2FileDrop [ngClass]="{'file-over': hasBaseDropZoneOver}"
+        (fileOver)="fileOverBase($event)" [uploader]="uploader">
+        <span>Drag & Drop your assets here</span>
+        <span>or</span>
+        <label for="file-upload" class="btn-primary">
+            Browse
+        </label>
+        <input id="file-upload" type="file" ng2FileSelect [uploader]="uploader" multiple>
+    </div>
+</div>
+
+<div *ngIf="uploader.queue.length > 0 && allFilesFailedToUpload" class="upload-failed flex align-items-center justify-content-between">
+    <div class="flex align-items-center">
+        <mat-icon style="margin-right: 1rem;" class="alert-icon">info</mat-icon>
+        <span>Upload Failed</span>
+    </div>
+    <div class="flex align-items-center">
+        <span (click)="retryUploadAll()" style="margin-right: 1rem; cursor: pointer;">RETRY</span>
+        <mat-icon (click)="allFilesFailedToUpload = false" class="close-button">close</mat-icon>
+    </div>
+</div>
+
+<div *ngFor="let item of uploader.queue; let i=index">
+    <div>
+        {{ item.file.name }}
+    </div>
+    <div style="margin-right: 2rem;" class="flex align-items-center justify-content-between">
+        <span>{{ item.file.size | fileSize}}</span>
+        <span>{{ item.progress }}%</span>
+    </div>
+
+    <div class="progress-wrapper">
+        <div class="progress"
+            [ngClass]="{'progress-success': item.isSuccess, 'progress-active': item.isUploading, 'progress-bar-striped': item.isUploading}">
+            <div class="progress-bar" role="progressbar"
+                [style.background-color]="item.isSuccess ? '#FDA560' : '#EB625B'"
+                [ngStyle]="{ 'width': recordFileProgress[item.file.name!] + '%' }"></div>
+        </div>
+        <mat-icon class="close-button" (click)="removeFileFromQueue(item)">close</mat-icon>
+    </div>
+
+    <div class="error" role="alert" *ngIf="item.isError">
+        Error uploading file. <span id="retry" (click)="item.upload()">Try again?</span>
+    </div>
+</div>

@@ -1,0 +1,48 @@
+<div [style.margin-bottom]="'1rem'" class="flex align-items-center justify-content-between" *ngIf="files.length > 0">
+    <span>{{ files.length }} Files Selected</span>
+    <button class="btn-primary" (click)="uploadFiles(files)">Import</button>
+</div>
+
+<div *ngIf="files.length <= 0" class="file-drop-zone flex align-items-center justify-content-center"
+    (drop)="onDrop($event)" (dragover)="onDragOver($event)" (dragleave)="onDragLeave($event)"
+    [ngClass]="{'file-over': hasFileOver}">
+    <span>Drag & Drop your assets here</span>
+    <span>or</span>
+    <label for="file-upload" class="btn-primary">
+        Browse
+    </label>
+    <input id="file-upload" type="file" multiple (change)="onFileSelect($event)">
+</div>
+
+<div *ngIf="files.length > 0 && allFilesFailedToUpload"
+    class="upload-failed flex align-items-center justify-content-between">
+    <div class="flex align-items-center">
+        <mat-icon style="margin-right: 1rem;" class="alert-icon">info</mat-icon>
+        <span>Upload Failed</span>
+    </div>
+    <div class="flex align-items-center">
+        <span (click)="retryAll()" class="btn-retry">RETRY</span>
+        <mat-icon class="btn-close">close</mat-icon>
+    </div>
+</div>
+
+<div *ngFor="let file of files; let i = index;">
+    <div>{{ file.name }}</div>
+    <div style="margin-right: 2rem;" class="flex align-items-center justify-content-between">
+        <span>{{ file.file.size | fileSize}}</span>
+        <span>{{ file.progress }}%</span>
+    </div>
+
+    <div class="progress-wrapper">
+        <div class="progress">
+            <div class="progress-bar" role="progressbar" [ngStyle]="{ 'width': file.progress + '%' }"
+                [style.background-color]="!file.error ? '#FDA560' : '#EB625B'">
+            </div>
+        </div>
+        <mat-icon class="btn-close" (click)="removeFileFromQueue(i)">close</mat-icon>
+    </div>
+
+    <div class="error" role="alert" *ngIf="file.error">
+        Error uploading file. <span id="retry" (click)="retryFile(file)">Try again?</span>
+    </div>
+</div>
